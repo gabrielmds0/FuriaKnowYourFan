@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Registrations hold personal data (CPF, address, documents).
+// Visitors may only create their own entry; nobody reads, edits or deletes
+// from the client. Staff access goes through the Firebase console / Admin SDK.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /fans/{fanId} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'cpf', 'email', 'createdAt'])
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.cpf is string
+                    && request.resource.data.cpf.size() <= 14;
+      allow read, update, delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
